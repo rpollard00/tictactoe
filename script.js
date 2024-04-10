@@ -20,6 +20,29 @@ const Cell = () => {
 
 const newBoard = (players) => {
   const size = 3;
+  const rowCount = {
+    1: Array(size).fill(0),
+    2: Array(size).fill(0),
+  };
+
+  const colCount = {
+    1: Array(size).fill(0),
+    2: Array(size).fill(0),
+  };
+
+  const diagCountLeft = {
+    0: 0,
+    1: 0,
+    2: 0,
+  };
+
+  const diagCountRight = {
+    0: 0,
+    1: 0,
+    2: 0,
+  };
+  const totalCells = size * size;
+  let occupiedCells = 0;
 
   const board = ((size) => {
     return [...Array(size)].map(() => Array(size).fill(null).map(Cell));
@@ -31,6 +54,19 @@ const newBoard = (players) => {
       return;
     }
 
+    occupiedCells++;
+    rowCount[value][r]++;
+    colCount[value][c]++;
+
+    // handle diagonals
+    if (r === c) {
+      diagCountLeft[value]++;
+    }
+
+    if (r === size - 1 - c) {
+      diagCountRight[value]++;
+    }
+
     board[r][c].set(value);
   };
 
@@ -40,6 +76,27 @@ const newBoard = (players) => {
       return null;
     }
     return board[r][c].get();
+  };
+
+  const checkForWin = () => {
+    if (diagCountLeft[1] === size || diagCountRight[1] === size) {
+      return 1;
+    }
+    if (diagCountLeft[2] === size || diagCountRight[2] === size) {
+      return 2;
+    }
+    for (let i = 0; i < size; i++) {
+      if (colCount[1][i] === size || rowCount[1][i] === size) {
+        return 1;
+      } else if (colCount[2][i] === size || rowCount[2][i] === size) {
+        return 2;
+      }
+    }
+
+    // no winner
+    if (occupiedCells === totalCells) {
+      return 3;
+    }
   };
 
   const printBoard = () => {
@@ -58,6 +115,7 @@ const newBoard = (players) => {
     setBoard,
     printBoard,
     checkBoard,
+    checkForWin,
   };
 };
 
@@ -124,7 +182,18 @@ const Controller = () => {
     console.log(`Playing round ${round}...`);
     console.log(`Active ${activePlayer}: ${players[activePlayer].getName()}`);
     game.setBoard(r, c, activePlayer);
+
     game.printBoard();
+    let winVal = game.checkForWin();
+    if (winVal === 3) {
+      console.log("Game ended in a tie.");
+      return;
+    }
+    if (winVal === 1 || winVal === 2) {
+      console.log(`Game won by ${winVal}`);
+      return;
+    }
+
     switchActivePlayer();
 
     ++round;
@@ -141,10 +210,29 @@ const Controller = () => {
   return { playRound };
 };
 
-const controller = Controller();
+let controller = Controller();
 controller.playRound(1, 1);
 controller.playRound(0, 0);
 controller.playRound(1, 2);
 controller.playRound(2, 2);
 controller.playRound(2, 2);
 controller.playRound(1, 0);
+
+controller = Controller();
+controller.playRound(0, 2);
+controller.playRound(0, 0);
+controller.playRound(1, 1);
+controller.playRound(0, 1);
+controller.playRound(2, 0);
+
+// tie game
+controller = Controller();
+controller.playRound(0, 0);
+controller.playRound(1, 0);
+controller.playRound(2, 0);
+controller.playRound(1, 1);
+controller.playRound(0, 1);
+controller.playRound(2, 1);
+controller.playRound(1, 2);
+controller.playRound(0, 2);
+controller.playRound(2, 2);
