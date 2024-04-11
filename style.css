@@ -7,9 +7,13 @@ body {
     align-items: center;
 }
 
-h1 {
+.header {
     grid-column: 2 / 3;
     grid-row: 1 / 2;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: max(10px, 10vw);
+    justify-items: center;
 }
 
 .container {
@@ -38,6 +42,10 @@ h1 {
 }
 
 .controls {
-    grid-column: 2 / 3;
+    grid-column: 1 / 4;
     grid-row: 3 / 4;
+}
+
+.player-header {
+    display: inline-block;
 }
