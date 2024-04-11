@@ -3,11 +3,20 @@ body {
     height: 100dvh;
     grid-template: 1fr 10fr 1fr / 1fr 5fr 1fr;
 
+    justify-items: center;
+    align-items: center;
+}
+
+h1 {
+    grid-column: 2 / 3;
+    grid-row: 1 / 2;
 }
 
 .container {
     grid-column: 2 / 3;
     grid-row: 2 / 3;
+    height: 100%;
+    width: 100%;
     border: 1px solid red;
     display: flex;
     flex-direction: column;
@@ -26,4 +35,9 @@ body {
     align-content: center;
     color: white;
     font-size: 5rem;
+}
+
+.controls {
+    grid-column: 2 / 3;
+    grid-row: 3 / 4;
 }
