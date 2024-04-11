@@ -1,0 +1,29 @@
+body {
+    display: grid;
+    height: 100dvh;
+    grid-template: 1fr 10fr 1fr / 1fr 5fr 1fr;
+
+}
+
+.container {
+    grid-column: 2 / 3;
+    grid-row: 2 / 3;
+    border: 1px solid red;
+    display: flex;
+    flex-direction: column;
+}
+
+.grid-row {
+    display: flex;
+    flex: 1 1 0;
+}
+
+.grid-cell {
+    flex: 1 1 0;
+    background-color: blue;
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    color: white;
+    font-size: 5rem;
+}
