@@ -255,7 +255,7 @@ const Controller = (board, players) => {
   return { playRound, init, gameOver };
 };
 
-const RenderInterface = (controller, board, players) => {
+const Interface = (controller, board, players) => {
   const size = board.size;
   const cells = [];
 
@@ -279,29 +279,18 @@ const RenderInterface = (controller, board, players) => {
   })(size);
 
   renderGrid = () => {
-    // console.log("Render board", board);
-    // console.log("players", players);
     board.getBoard().map((row, r) =>
       row.map((col, c) => {
         let cell = document.querySelector(`#cell-${r}-${c}`);
-        // console.log(`Selector: #cell-${r}-${c}`);
-        // console.log(`SYMBOL: ${col.get()}`, players[col.get()].getSymbol());
-
         cell.textContent = players[col.get()].getSymbol();
-        // console.log("Players: ", players[1].getSymbol());
-        // console.log("Col", col.get());
-        // console.log("Cell", Cell);
-        // console.log("Cell innerText", Cell.innerText);
       }),
     );
   };
 
   cells.map((cell) => {
     cell.addEventListener("click", (e) => {
-      // console.log(e.target.id);
       const row = e.target.dataset.row;
       const col = e.target.dataset.col;
-      // console.log("Controller", controller);
       controller.playRound(row, col);
       renderGrid();
     });
@@ -325,14 +314,21 @@ const Game = () => {
   const players = [player0, player1, player2];
   let board = Board();
   let controller = Controller(board, players);
-  let interface = RenderInterface(controller, board, players);
+  let interface = Interface(controller, board, players);
 
   const restartGame = () => {
     board.init();
     controller.init();
     interface.renderGrid();
   };
-  return { restartGame, board, controller, interface };
+
+  const initControls = (() => {
+    newGame = document.querySelector("#new-game-button");
+    newGame.addEventListener("click", () => {
+      restartGame();
+    });
+  })();
+  return { restartGame };
 };
 
 let game = Game();
