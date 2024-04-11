@@ -62,9 +62,7 @@ const Board = (size = 3) => {
   };
 
   // init on load
-  (() => {
-    init();
-  })();
+  init();
 
   const setBoard = (row, col, value) => {
     // coerce to number;
@@ -207,9 +205,7 @@ const Controller = (board, players) => {
   };
 
   // init on creation but, allos init to be exported as a method and recycled
-  (() => {
-    init();
-  })();
+  init();
 
   const playRound = (r, c) => {
     if (gameOver) {
