@@ -309,8 +309,8 @@ const Interface = (controller, board, players) => {
 
 const Game = () => {
   const player0 = Player("dummy", " ");
-  let player1 = Player("Corbin", "C");
-  let player2 = Player("Marco", "M");
+  let player1 = Player("Player1", "X");
+  let player2 = Player("Player2", "O");
   const players = [player0, player1, player2];
   let board = Board();
   let controller = Controller(board, players);
@@ -322,10 +322,31 @@ const Game = () => {
     interface.renderGrid();
   };
 
-  const initControls = (() => {
+  const initUI = (() => {
     newGame = document.querySelector("#new-game-button");
     newGame.addEventListener("click", () => {
       restartGame();
+    });
+
+    player1NameHeader = document.querySelector("#player-1-name");
+    player1NameHeader.textContent = player1.getName();
+    player2NameHeader = document.querySelector("#player-2-name");
+    player2NameHeader.textContent = player2.getName();
+    player1Button = document.querySelector("#player-1-button");
+    player2Button = document.querySelector("#player-2-button");
+
+    player1Button.addEventListener("click", () => {
+      player1Input = document.querySelector("#player-1-input");
+      player1.setName(player1Input.value);
+      player1NameHeader.textContent = player1.getName();
+      player1Input.textContent = "";
+    });
+
+    player2Button.addEventListener("click", () => {
+      player2Input = document.querySelector("#player-2-input");
+      player2.setName(player2Input.value);
+      player2NameHeader.textContent = player2.getName();
+      player2Input.textContent = "";
     });
   })();
   return { restartGame };
