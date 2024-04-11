@@ -18,8 +18,7 @@ const Cell = () => {
   };
 };
 
-const Board = () => {
-  const size = 3;
+const Board = (size = 3) => {
   let rowCount = {};
   let colCount = {};
   let diagCountLeft = {};
@@ -62,9 +61,14 @@ const Board = () => {
     initScoring();
   };
 
+  // init on load
+  (() => {
+    init();
+  })();
+
   const setBoard = (row, col, value) => {
     // coerce to number;
-    console.log(`Set board: ${row}, ${col} to ${value}`);
+    // console.log(`Set board: ${row}, ${col} to ${value}`);
     let r = +row;
     let c = +col;
     if (r < 0 || r >= size || c < 0 || c >= size) {
@@ -81,13 +85,13 @@ const Board = () => {
       diagCountLeft[value]++;
     }
 
-    console.log(`${r} === ${size - 1 - c}`);
+    // console.log(`${r} === ${size - 1 - c}`);
     if (r === size - 1 - c) {
       diagCountRight[value]++;
     }
 
     board[r][c].set(value);
-    console.log(`Board ${r},${c} set to ${board[r][c].get()}`);
+    // console.log(`Board ${r},${c} set to ${board[r][c].get()}`);
   };
 
   const getBoard = () => {
@@ -190,17 +194,28 @@ const Player = (playerName, playerSymbol) => {
 const Controller = (board, players) => {
   const { CellValue } = Cell();
 
+  let gameOver = false;
   let activePlayer = CellValue.PLAYER_1;
 
   let round = 1;
 
-  const init = (() => {
-    board.init();
+  const init = () => {
+    // board.init();
+    gameOver = false;
     activePlayer = CellValue.PLAYER_1;
     round = 1;
+  };
+
+  // init on creation but, allos init to be exported as a method and recycled
+  (() => {
+    init();
   })();
 
   const playRound = (r, c) => {
+    if (gameOver) {
+      console.log("Game is over");
+      return;
+    }
     // check r, c is unoccupied
     if (board.checkBoard(r, c) !== CellValue.EMPTY) {
       console.error("Board position is occupied, please choose another cell");
@@ -211,12 +226,15 @@ const Controller = (board, players) => {
       return;
     }
 
-    console.log(`Playing round ${round}...`);
-    console.log(`Active ${activePlayer}: ${players[activePlayer].getName()}`);
+    // console.log(`Playing round ${round}...`);
+    // console.log(`Active ${activePlayer}: ${players[activePlayer].getName()}`);
     board.setBoard(r, c, activePlayer);
 
-    board.printBoard();
+    // board.printBoard();
     let winVal = board.checkForWin();
+    if (winVal > 0) {
+      gameOver = true;
+    }
     if (winVal === 3) {
       console.log("Game ended in a tie.");
       return;
@@ -238,15 +256,15 @@ const Controller = (board, players) => {
         : CellValue.PLAYER_1;
   };
 
-  return { playRound, init };
+  return { playRound, init, gameOver };
 };
 
 const RenderInterface = (controller, board, players) => {
-  const container = document.querySelector(".container");
   const size = board.size;
   const cells = [];
 
   const generateGrid = ((size) => {
+    const container = document.querySelector(".container");
     for (let r = 0; r < size; ++r) {
       let row = document.createElement("div");
       row.classList = "grid-row";
@@ -266,16 +284,16 @@ const RenderInterface = (controller, board, players) => {
 
   renderGrid = () => {
     // console.log("Render board", board);
-    console.log("players", players);
+    // console.log("players", players);
     board.getBoard().map((row, r) =>
       row.map((col, c) => {
         let cell = document.querySelector(`#cell-${r}-${c}`);
-        console.log(`Selector: #cell-${r}-${c}`);
+        // console.log(`Selector: #cell-${r}-${c}`);
         // console.log(`SYMBOL: ${col.get()}`, players[col.get()].getSymbol());
 
         cell.textContent = players[col.get()].getSymbol();
-        console.log("Players: ", players[1].getSymbol());
-        console.log("Col", col.get());
+        // console.log("Players: ", players[1].getSymbol());
+        // console.log("Col", col.get());
         // console.log("Cell", Cell);
         // console.log("Cell innerText", Cell.innerText);
       }),
@@ -284,18 +302,18 @@ const RenderInterface = (controller, board, players) => {
 
   cells.map((cell) => {
     cell.addEventListener("click", (e) => {
-      console.log(e.target.id);
+      // console.log(e.target.id);
       const row = e.target.dataset.row;
       const col = e.target.dataset.col;
-      console.log("Controller", controller);
+      // console.log("Controller", controller);
       controller.playRound(row, col);
       renderGrid();
     });
   });
 
   const resetInterface = () => {
-    controller.resetController();
-    renderGrid(controller.game.board, controller.players);
+    let container = document.querySelector(".container");
+    console.log(container.children);
   };
 
   return {
@@ -304,17 +322,24 @@ const RenderInterface = (controller, board, players) => {
   };
 };
 
-const startGame = () => {
+const Game = () => {
   const player0 = Player("dummy", " ");
   let player1 = Player("Corbin", "C");
   let player2 = Player("Marco", "M");
   const players = [player0, player1, player2];
-  let board = Board(players);
+  let board = Board();
   let controller = Controller(board, players);
   let interface = RenderInterface(controller, board, players);
+
+  const restartGame = () => {
+    board.init();
+    controller.init();
+    interface.renderGrid();
+  };
+  return { restartGame, board, controller, interface };
 };
 
-startGame();
+let game = Game();
 // controller.playRound(1, 1);
 // controller.playRound(0, 0);
 // controller.playRound(1, 2);
