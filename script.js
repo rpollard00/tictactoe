@@ -18,37 +18,55 @@ const Cell = () => {
   };
 };
 
-const newBoard = (players) => {
+const Board = () => {
   const size = 3;
-  const rowCount = {
-    1: Array(size).fill(0),
-    2: Array(size).fill(0),
-  };
+  let rowCount = {};
+  let colCount = {};
+  let diagCountLeft = {};
+  let diagCountRight = {};
 
-  const colCount = {
-    1: Array(size).fill(0),
-    2: Array(size).fill(0),
-  };
-
-  const diagCountLeft = {
-    0: 0,
-    1: 0,
-    2: 0,
-  };
-
-  const diagCountRight = {
-    0: 0,
-    1: 0,
-    2: 0,
-  };
   const totalCells = size * size;
-  let occupiedCells = 0;
 
-  const board = ((size) => {
+  let board;
+
+  const buildBoard = (size) => {
     return [...Array(size)].map(() => Array(size).fill(null).map(Cell));
-  })(size);
+  };
 
-  const setBoard = (r, c, value) => {
+  const initScoring = () => {
+    occupiedCells = 0;
+    rowCount = {
+      1: Array(size).fill(0),
+      2: Array(size).fill(0),
+    };
+
+    colCount = {
+      1: Array(size).fill(0),
+      2: Array(size).fill(0),
+    };
+
+    diagCountLeft = {
+      0: 0,
+      1: 0,
+      2: 0,
+    };
+
+    diagCountRight = {
+      0: 0,
+      1: 0,
+      2: 0,
+    };
+  };
+  const init = () => {
+    board = buildBoard(size);
+    initScoring();
+  };
+
+  const setBoard = (row, col, value) => {
+    // coerce to number;
+    console.log(`Set board: ${row}, ${col} to ${value}`);
+    let r = +row;
+    let c = +col;
     if (r < 0 || r >= size || c < 0 || c >= size) {
       console.error("Invalid board position");
       return;
@@ -63,13 +81,18 @@ const newBoard = (players) => {
       diagCountLeft[value]++;
     }
 
+    console.log(`${r} === ${size - 1 - c}`);
     if (r === size - 1 - c) {
       diagCountRight[value]++;
     }
 
     board[r][c].set(value);
+    console.log(`Board ${r},${c} set to ${board[r][c].get()}`);
   };
 
+  const getBoard = () => {
+    return board;
+  };
   const checkBoard = (r, c) => {
     if (r < 0 || r >= size || c < 0 || c >= size) {
       console.error("Invalid board position");
@@ -99,27 +122,34 @@ const newBoard = (players) => {
     }
   };
 
+  // const printBoard = () => {
+  //   for (let r = 0; r < board.length; r++) {
+  //     board[r].map((c) => {
+  //       process.stdout.write(
+  //         `|${c.get() === 0 ? " " : players[c.get()].getSymbol()}`,
+  //       );
+  //     });
+  //     process.stdout.write("|\r\n");
+  //   }
+  // };
   const printBoard = () => {
     for (let r = 0; r < board.length; r++) {
-      board[r].map((c) => {
-        process.stdout.write(
-          `|${c.get() === 0 ? " " : players[c.get()].getSymbol()}`,
-        );
-      });
-      process.stdout.write("|\r\n");
+      console.log(board[r]);
     }
   };
 
   return {
-    board,
+    size,
+    getBoard,
     setBoard,
     printBoard,
     checkBoard,
     checkForWin,
+    init,
   };
 };
 
-const newPlayer = (playerName, playerSymbol) => {
+const Player = (playerName, playerSymbol) => {
   let name = "";
   let symbol = "";
 
@@ -157,34 +187,36 @@ const newPlayer = (playerName, playerSymbol) => {
   };
 };
 
-const Controller = () => {
-  const player1 = newPlayer("Corbin", "C");
-  const player2 = newPlayer("Marco", "M");
-  const players = [null, player1, player2];
+const Controller = (board, players) => {
   const { CellValue } = Cell();
 
-  const game = newBoard(players);
-
   let activePlayer = CellValue.PLAYER_1;
+
   let round = 1;
+
+  const init = (() => {
+    board.init();
+    activePlayer = CellValue.PLAYER_1;
+    round = 1;
+  })();
 
   const playRound = (r, c) => {
     // check r, c is unoccupied
-    if (game.checkBoard(r, c) !== CellValue.EMPTY) {
+    if (board.checkBoard(r, c) !== CellValue.EMPTY) {
       console.error("Board position is occupied, please choose another cell");
       return;
     }
-    if (game.checkBoard(r, c) === null) {
+    if (board.checkBoard(r, c) === null) {
       console.error("Out of bounds. Please try again.");
       return;
     }
 
     console.log(`Playing round ${round}...`);
     console.log(`Active ${activePlayer}: ${players[activePlayer].getName()}`);
-    game.setBoard(r, c, activePlayer);
+    board.setBoard(r, c, activePlayer);
 
-    game.printBoard();
-    let winVal = game.checkForWin();
+    board.printBoard();
+    let winVal = board.checkForWin();
     if (winVal === 3) {
       console.log("Game ended in a tie.");
       return;
@@ -206,33 +238,105 @@ const Controller = () => {
         : CellValue.PLAYER_1;
   };
 
-  game.printBoard();
-  return { playRound };
+  return { playRound, init };
 };
 
-let controller = Controller();
-controller.playRound(1, 1);
-controller.playRound(0, 0);
-controller.playRound(1, 2);
-controller.playRound(2, 2);
-controller.playRound(2, 2);
-controller.playRound(1, 0);
+const RenderInterface = (controller, board, players) => {
+  const container = document.querySelector(".container");
+  const size = board.size;
+  const cells = [];
 
-controller = Controller();
-controller.playRound(0, 2);
-controller.playRound(0, 0);
-controller.playRound(1, 1);
-controller.playRound(0, 1);
-controller.playRound(2, 0);
+  const generateGrid = ((size) => {
+    for (let r = 0; r < size; ++r) {
+      let row = document.createElement("div");
+      row.classList = "grid-row";
+      row.id = `row-${r}`;
+      for (let c = 0; c < size; ++c) {
+        let cell = document.createElement("div");
+        cell.classList = "grid-cell";
+        cell.id = `cell-${r}-${c}`;
+        cell.dataset.row = r;
+        cell.dataset.col = c;
+        row.appendChild(cell);
+        cells.push(cell);
+      }
+      container.appendChild(row);
+    }
+  })(size);
 
-// tie game
-controller = Controller();
-controller.playRound(0, 0);
-controller.playRound(1, 0);
-controller.playRound(2, 0);
-controller.playRound(1, 1);
-controller.playRound(0, 1);
-controller.playRound(2, 1);
-controller.playRound(1, 2);
-controller.playRound(0, 2);
-controller.playRound(2, 2);
+  renderGrid = () => {
+    // console.log("Render board", board);
+    console.log("players", players);
+    board.getBoard().map((row, r) =>
+      row.map((col, c) => {
+        let cell = document.querySelector(`#cell-${r}-${c}`);
+        console.log(`Selector: #cell-${r}-${c}`);
+        // console.log(`SYMBOL: ${col.get()}`, players[col.get()].getSymbol());
+
+        cell.textContent = players[col.get()].getSymbol();
+        console.log("Players: ", players[1].getSymbol());
+        console.log("Col", col.get());
+        // console.log("Cell", Cell);
+        // console.log("Cell innerText", Cell.innerText);
+      }),
+    );
+  };
+
+  cells.map((cell) => {
+    cell.addEventListener("click", (e) => {
+      console.log(e.target.id);
+      const row = e.target.dataset.row;
+      const col = e.target.dataset.col;
+      console.log("Controller", controller);
+      controller.playRound(row, col);
+      renderGrid();
+    });
+  });
+
+  const resetInterface = () => {
+    controller.resetController();
+    renderGrid(controller.game.board, controller.players);
+  };
+
+  return {
+    renderGrid,
+    resetInterface,
+  };
+};
+
+const startGame = () => {
+  const player0 = Player("dummy", " ");
+  let player1 = Player("Corbin", "C");
+  let player2 = Player("Marco", "M");
+  const players = [player0, player1, player2];
+  let board = Board(players);
+  let controller = Controller(board, players);
+  let interface = RenderInterface(controller, board, players);
+};
+
+startGame();
+// controller.playRound(1, 1);
+// controller.playRound(0, 0);
+// controller.playRound(1, 2);
+// controller.playRound(2, 2);
+// controller.playRound(2, 2);
+// controller.playRound(1, 0);
+//
+// controller = Controller();
+// controller.playRound(0, 2);
+// controller.playRound(0, 0);
+// controller.playRound(1, 1);
+// controller.playRound(0, 1);
+// controller.playRound(2, 0);
+//
+// // tie game
+// controller = Controller();
+// controller.playRound(0, 0);
+// controller.playRound(1, 0);
+// controller.playRound(2, 0);
+// controller.playRound(1, 1);
+// controller.playRound(0, 1);
+// controller.playRound(2, 1);
+// controller.playRound(1, 2);
+// controller.playRound(0, 2);
+// controller.playRound(2, 2);
