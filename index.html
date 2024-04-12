@@ -18,14 +18,19 @@
     </div>
     <div class="container"></div>
     <div class="controls">
-        <label for="player-1-name">Player 1 Name:</label>
-        <input type="text" id="player-1-input" />
-        <button type="button" id="player-1-button">Update</button>
+        <div class="player-control">
+            <label for="player-1-name">Player 1:</label>
+            <input type="text" id="player-1-input" placeholder="Name" />
+            <button type="button" id="player-1-button">Update</button>
+        </div>
         <button type="button" id="new-game-button">New Game</button>
-        <label for="player-2-name">Player 2 Name:</label>
-        <input type="text" id="player-2-input" />
-        <button type="button" id="player-2-button">Update</button>
+        <div class="player-control">
+            <label for="player-2-name">Player 2:</label>
+            <input type="text" id="player-2-input" placeholder="Name" />
+            <button type="button" id="player-2-button">Update</button>
+        </div>
     </div>
+    <div class="hidden" id="banner">A winner is someone</div>
 </body>
 
 </html>

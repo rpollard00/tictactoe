@@ -5,6 +5,8 @@ body {
 
     justify-items: center;
     align-items: center;
+
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
 .header {
@@ -14,6 +16,13 @@ body {
     grid-template-columns: 1fr 1fr 1fr;
     gap: max(10px, 10vw);
     justify-items: center;
+    align-items: center;
+}
+
+.player-header {
+    display: block;
+    padding: 10px;
+
 }
 
 .container {
@@ -21,7 +30,7 @@ body {
     grid-row: 2 / 3;
     height: 100%;
     width: 100%;
-    border: 1px solid red;
+    border: 4px solid yellow;
     display: flex;
     flex-direction: column;
 }
@@ -31,21 +40,58 @@ body {
     flex: 1 1 0;
 }
 
+.active-player {
+    border: 2px solid lime;
+
+}
+
 .grid-cell {
     flex: 1 1 0;
-    background-color: blue;
+
+    border: 2px solid black;
+
     display: grid;
     justify-items: center;
     align-content: center;
-    color: white;
+    color: black;
     font-size: 5rem;
 }
 
 .controls {
     grid-column: 1 / 4;
     grid-row: 3 / 4;
+    width: 100%;
+    height: 100%;
+    gap: 20px;
+    display: flex;
+    padding-inline: 20px;
+    justify-content: space-evenly;
+    align-items: center;
 }
 
-.player-header {
-    display: inline-block;
+
+#banner {
+    background-color: royalblue;
+    color: white;
+    position: absolute;
+    top: 45dvh;
+    width: 100dvw;
+    height: 10dvh;
+    z-index: 2;
+
+    font-size: 3.5rem;
+    font-style: italic;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#banner.hidden {
+    display: none;
+}
+
+
+input[type="text"] {
+    width: min(5vw, 50px);
 }
