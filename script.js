@@ -252,7 +252,13 @@ const Controller = (board, players) => {
         : CellValue.PLAYER_1;
   };
 
-  return { playRound, init, gameOver };
+  const getActivePlayer = () => {
+    return activePlayer;
+  };
+
+  const isGameOver = () => gameOver;
+
+  return { playRound, init, isGameOver, getActivePlayer };
 };
 
 const Interface = (controller, board, players) => {
@@ -286,12 +292,36 @@ const Interface = (controller, board, players) => {
       }),
     );
   };
+  renderActive = () => {
+    const active = controller.getActivePlayer();
+    console.log("Active is", active);
+    const inactive = active === 1 ? 2 : 1;
+
+    const activeHeader = document.querySelector(`#player-${active}-name`);
+    const inactiveHeader = document.querySelector(`#player-${inactive}-name`);
+    activeHeader.classList.add("active-player");
+    inactiveHeader.classList.remove("active-player");
+
+    const banner = document.querySelector(`#banner`);
+    if (controller.isGameOver()) {
+      let winner = board.checkForWin();
+      banner.classList.remove("hidden");
+      if (winner === 1 || winner === 2) {
+        banner.textContent = `Player ${winner} wins!`;
+      } else {
+        banner.textContent = "Game ended in a draw!";
+      }
+    } else {
+      banner.classList.add("hidden");
+    }
+  };
 
   cells.map((cell) => {
     cell.addEventListener("click", (e) => {
       const row = e.target.dataset.row;
       const col = e.target.dataset.col;
       controller.playRound(row, col);
+      renderActive();
       renderGrid();
     });
   });
@@ -304,6 +334,7 @@ const Interface = (controller, board, players) => {
   return {
     renderGrid,
     resetInterface,
+    renderActive,
   };
 };
 
@@ -319,6 +350,7 @@ const Game = () => {
   const restartGame = () => {
     board.init();
     controller.init();
+    interface.renderActive();
     interface.renderGrid();
   };
 
@@ -348,6 +380,8 @@ const Game = () => {
       player2NameHeader.textContent = player2.getName();
       player2Input.textContent = "";
     });
+
+    interface.renderActive();
   })();
   return { restartGame };
 };
