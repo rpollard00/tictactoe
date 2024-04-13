@@ -1,4 +1,4 @@
-// Game - IIFE
+// Game - IIFnoneE
 const Cell = () => {
   const CellValue = {
     EMPTY: 0,
@@ -66,11 +66,9 @@ const Board = (size = 3) => {
 
   const setBoard = (row, col, value) => {
     // coerce to number;
-    // console.log(`Set board: ${row}, ${col} to ${value}`);
     let r = +row;
     let c = +col;
     if (r < 0 || r >= size || c < 0 || c >= size) {
-      console.error("Invalid board position");
       return;
     }
 
@@ -83,13 +81,11 @@ const Board = (size = 3) => {
       diagCountLeft[value]++;
     }
 
-    // console.log(`${r} === ${size - 1 - c}`);
     if (r === size - 1 - c) {
       diagCountRight[value]++;
     }
 
     board[r][c].set(value);
-    // console.log(`Board ${r},${c} set to ${board[r][c].get()}`);
   };
 
   const getBoard = () => {
@@ -124,27 +120,10 @@ const Board = (size = 3) => {
     }
   };
 
-  // const printBoard = () => {
-  //   for (let r = 0; r < board.length; r++) {
-  //     board[r].map((c) => {
-  //       process.stdout.write(
-  //         `|${c.get() === 0 ? " " : players[c.get()].getSymbol()}`,
-  //       );
-  //     });
-  //     process.stdout.write("|\r\n");
-  //   }
-  // };
-  const printBoard = () => {
-    for (let r = 0; r < board.length; r++) {
-      console.log(board[r]);
-    }
-  };
-
   return {
     size,
     getBoard,
     setBoard,
-    printBoard,
     checkBoard,
     checkForWin,
     init,
@@ -209,7 +188,6 @@ const Controller = (board, players) => {
 
   const playRound = (r, c) => {
     if (gameOver) {
-      console.log("Game is over");
       return;
     }
     // check r, c is unoccupied
@@ -222,21 +200,16 @@ const Controller = (board, players) => {
       return;
     }
 
-    // console.log(`Playing round ${round}...`);
-    // console.log(`Active ${activePlayer}: ${players[activePlayer].getName()}`);
     board.setBoard(r, c, activePlayer);
 
-    // board.printBoard();
     let winVal = board.checkForWin();
     if (winVal > 0) {
       gameOver = true;
     }
     if (winVal === 3) {
-      console.log("Game ended in a tie.");
       return;
     }
     if (winVal === 1 || winVal === 2) {
-      console.log(`Game won by ${winVal}`);
       return;
     }
 
@@ -257,8 +230,9 @@ const Controller = (board, players) => {
   };
 
   const isGameOver = () => gameOver;
+  const getRound = () => round;
 
-  return { playRound, init, isGameOver, getActivePlayer };
+  return { playRound, init, getRound, isGameOver, getActivePlayer };
 };
 
 const Interface = (controller, board, players) => {
@@ -294,7 +268,6 @@ const Interface = (controller, board, players) => {
   };
   renderActive = () => {
     const active = controller.getActivePlayer();
-    console.log("Active is", active);
     const inactive = active === 1 ? 2 : 1;
 
     const activeHeader = document.querySelector(`#player-${active}-name`);
@@ -303,11 +276,15 @@ const Interface = (controller, board, players) => {
     inactiveHeader.classList.remove("active-player");
 
     const banner = document.querySelector(`#banner`);
+
     if (controller.isGameOver()) {
       let winner = board.checkForWin();
       banner.classList.remove("hidden");
       if (winner === 1 || winner === 2) {
-        banner.textContent = `Player ${winner} wins!`;
+        let winnerName = players[winner].getName().startsWith("Player")
+          ? winner
+          : players[winner].getName();
+        banner.textContent = `Player ${winnerName} wins!`;
       } else {
         banner.textContent = "Game ended in a draw!";
       }
@@ -326,14 +303,8 @@ const Interface = (controller, board, players) => {
     });
   });
 
-  const resetInterface = () => {
-    let container = document.querySelector(".container");
-    console.log(container.children);
-  };
-
   return {
     renderGrid,
-    resetInterface,
     renderActive,
   };
 };
